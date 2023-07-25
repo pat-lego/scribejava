@@ -84,6 +84,7 @@ public class Request {
     String completeUrl = getCompleteUrl();
     if (connection == null) {
       System.setProperty("http.keepAlive", connectionKeepAlive ? "true" : "false");
+      logger.info("Keep alive is set to {}", connectionKeepAlive);
       connection = (HttpURLConnection) new URL(completeUrl).openConnection();
       connection.setInstanceFollowRedirects(followRedirects);
     }
@@ -115,8 +116,11 @@ public class Request {
   }
 
   void addHeaders(HttpURLConnection conn) {
-    for (String key : headers.keySet())
-      conn.setRequestProperty(key, headers.get(key));
+    for (String key : headers.keySet()) {
+      String value = headers.get(key);
+      logger.info("Adding header {} {} ", key, value);
+      conn.setRequestProperty(key, value);
+    }
   }
 
   void addBody(HttpURLConnection conn, byte[] content) throws IOException {
@@ -246,6 +250,7 @@ public class Request {
     if (bytePayload != null)
       return bytePayload;
     String body = (payload != null) ? payload : bodyParams.asFormUrlEncodedString();
+    logger.info("The body is set too {} ", body);
     try {
       return body.getBytes(getCharset());
     } catch (UnsupportedEncodingException uee) {
